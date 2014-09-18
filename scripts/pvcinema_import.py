@@ -27,7 +27,7 @@ import sys
 import json
 
 # TODO(cpatrick): These are hardcoded to my install and need to be fixed
-COLLECTION_ID = '541b12e259d2c77b18c99470'
+COLLECTION_ID = '541b35ba59d2c783b84a3dca'
 SERVER_ROOT = 'http://localhost:9000/api/v1'
 USERNAME = 'cpatrick'
 PASSWORD = '2pw4kw'
@@ -44,12 +44,18 @@ def push_folder(input, parent, token):
               'parentId': parent,
               'name': input['title'],
               'description': input['description'],
-              'foo': 'bar',
               'public': True}
     headers = {'Girder-Token': token}
-    requests.post('{}/folder'.format(SERVER_ROOT),
-                  params=params,
-                  headers=headers)
+    resp = requests.post('{}/folder'.format(SERVER_ROOT),
+                         params=params,
+                         headers=headers)
+    folder = resp.json()
+    metadata = {'pvcinema': 1}
+    resp = requests.put('{}/folder/{}/metadata'.format(SERVER_ROOT,
+                                                       folder['_id']),
+                        headers=headers,
+                        data=json.dumps(metadata))
+    return resp.json()
 
 
 def main():
@@ -63,7 +69,7 @@ def main():
     with open(sys.argv[1], 'r') as infile:
         json_data = json.load(infile)
         for dataset in json_data:
-            push_folder(dataset, COLLECTION_ID, token)
+            print(push_folder(dataset, COLLECTION_ID, token))
 
 
 if __name__ == '__main__':
