@@ -19,6 +19,7 @@
 
 from girder.api.describe import Description
 from girder.api.rest import Resource
+from girder.utility.model_importer import ModelImporter
 
 
 class PVCinema(Resource):
@@ -32,9 +33,13 @@ class PVCinema(Resource):
         Dynamically generate a cinema info file from girder data marked as
         cinema-viewable.
         """
-        return {
-            'Test': 'foo'
-        }
+
+        folderModel = ModelImporter().model('folder')
+        folders = folderModel.find({'meta.pvcinema': 1})
+        ret = [{'title': f['name'],
+                'description': f['description'],
+                'path': f['meta']['webpath']} for f in folders]
+        return ret
     makeInfo.description = (
         Description('Get a paraview cinema info json blob')
         .notes('The blob will contain the list of datasets available for '
